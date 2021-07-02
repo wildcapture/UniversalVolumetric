@@ -54,16 +54,15 @@ public class Actor implements SurfaceTexture.OnFrameAvailableListener,
 
     public float frameRate = 30;
 
-    public int currentFrame = 0;
-    public int lastFrame = -1;
+    protected int currentFrame = 0;
+    protected int lastFrame = -1;
 
     public void setCurrentFrameFromTime(){
-        this.currentFrame = (int)(mediaPlayer.getCurrentPosition() * this.frameRate)/1000;
+        currentFrame = (int)(mediaPlayer.getCurrentPosition() * this.frameRate)/1000;
     }
 
     public void updateFrame()
     {
-
         synchronized(this)
         {
             if (updateSurface)
@@ -72,14 +71,15 @@ public class Actor implements SurfaceTexture.OnFrameAvailableListener,
                 surfaceTexture.updateTexImage();
                 surfaceTexture.getTransformMatrix(mSTMatrix);
 
-                GetActorDataForFrame();
-                setLastFrameToCurrentFrame();
+                if (currentFrame!=lastFrame)
+                {
+                    GetActorDataForFrame();
+                    setLastFrameToCurrentFrame();
+                }
                 updateSurface = false;
             }
         }
 
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureID);
 
     }
     public void setLastFrameToCurrentFrame(){
@@ -109,6 +109,7 @@ public class Actor implements SurfaceTexture.OnFrameAvailableListener,
     public void onSurfaceCreated()
     {
         Timber.d("onSurfaceCreated");
+        currentFrame = 0;
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
         mTextureID = textures[0];
@@ -223,8 +224,9 @@ public class Actor implements SurfaceTexture.OnFrameAvailableListener,
             uvolInputStream.read(bytes, 0, length);
             currentUvolPosition = startBytePosition+length;
 
-            this.mesh = decode(bytes);
-            this.mesh.init();
+            mesh = decode(bytes);
+            mesh.init();
+            mesh.setParameter(mTextureID, mSTMatrix);
 
         } catch (JSONException | IOException e) {
             Timber.e("GetActorDataForFrame "+e);
@@ -286,12 +288,9 @@ public class Actor implements SurfaceTexture.OnFrameAvailableListener,
 
     @Override
     public synchronized void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        //Timber.d("onFrameAvailable");
+        updateSurface = true;
         setCurrentFrameFromTime();
-        //if(lastFrame != currentFrame)
-        {
-            updateSurface = true;
-       }
+        //Timber.d("onFrameAvailable %d",currentFrame);
     }
 
 

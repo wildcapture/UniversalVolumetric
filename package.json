@@ -1,6 +1,6 @@
 {
   "name": "volumetric",
-  "version": "0.2.22",
+  "version": "0.2.24",
   "repository": {
     "type": "git",
     "url": "git://github.com/XRFoundation/volumetric.git"
@@ -8,6 +8,9 @@
   "engines": {
     "yarn": ">= 0.18.0"
   },
+  "files": [
+    "web"
+  ],
   "npmClient": "yarn",
   "jest": "ts-jest",
   "scripts": {
@@ -27,7 +30,9 @@
   },
   "dependencies": {
     "shelljs": "0.8.4",
-    "three": "0.130.1",
     "xmlhttprequest": "1.8.0"
+  },
+  "peerDependencies": {
+    "three": ">0.130.0"
   }
 }
